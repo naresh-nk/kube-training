@@ -1,0 +1,88 @@
+- hosts: all
+  become: yes
+  tasks:
+
+   - name: Add the user 'kube' with a specific uid and a primary groups kube and wheel
+     user: name=kube groups=wheel append=yes state=present createhome=yes
+
+   - name: Configure password less sudo for wheel group
+     lineinfile: 
+       dest: /etc/sudoers 
+       state: present 
+       regexp: '^%wheel' 
+       line: '%wheel ALL=(ALL) NOPASSWD: ALL' 
+       validate: 'visudo -cf %s'
+
+   - name: Configure proxy for yum
+     when: "{{ proxy_setup }}"
+     lineinfile: dest=/etc/yum.conf state=present regexp='^proxy' line='proxy={{ proxy_server }}'
+
+   - name: Create dicrectory for docker proxy config file
+     file: name=/etc/systemd/system/docker.service.d state=directory
+
+   - name: Docker proxy for config
+     when: "{{ proxy_setup }}"
+     template: dest=/etc/systemd/system/docker.service.d/http-proxy.conf src=http-proxy.conf.j2
+
+   - name: Install Packages
+     yum: name=yum-utils,device-mapper-persistent-data,lvm2 state=present update_cache=true
+     retries: 3
+     delay: 3
+
+   - name: Configure docker repo
+     shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+   - name: Install Docker
+     yum: name=docker-ce state=present update_cache=true
+     retries: 3
+     delay: 3
+
+   - name: Create dicrectory for docker proxy config file
+     file: name=/etc/systemd/system/docker.service.d state=directory
+
+   - name: Docker proxy for config
+     when: "{{ proxy_setup }}"
+     template: dest=/etc/systemd/system/docker.service.d/http-proxy.conf src=http-proxy.conf.j2
+
+   - name: Daemon-reload
+     shell: systemctl daemon-reload
+
+   - name: Enable Docker
+     shell: "systemctl enable docker"
+
+   - name: Restart Docker
+     service: name=docker state=restarted
+
+   - name: Disable SELinux
+     shell: setenforce 0
+
+   - name: Disable SELinux on reboot
+     selinux: state=disabled
+
+   - name: ensure net.bridge.bridge-nf-call-ip6tables is set to 1
+     sysctl: name=net.bridge.bridge-nf-call-ip6tables value=1 state=present
+
+   - name: ensure net.bridge.bridge-nf-call-iptables is set to 1
+     sysctl: name=net.bridge.bridge-nf-call-iptables value=1 state=present
+
+   - name: add Kubernetes' YUM repository
+     yum_repository:
+      name: Kubernetes
+      description: Kubernetes YUM repository
+      baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+      gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      gpgcheck: yes
+
+   - name: Clean yum cache
+     shell: yum clean all
+
+   - name: install kubelet and kubeadm
+     yum: name=kubelet,kubeadm state=present update_cache=true
+     retries: 3
+     delay: 3
+
+- hosts: master
+  become: yes
+  tasks:
+   - name: install kubectl
+     yum: name=kubectl state=present allow_downgrade=yes update_cache=true
