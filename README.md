@@ -6,6 +6,30 @@ Ansible playbooks to install multinode Kubernetes cluster in below environment
 
 ## Getting Started
 
+### Assumptions
+
+* SSH key based authentication is configured(not mandatory) from installation machine to all nodes in cluster
+* SWAP is off on all nodes(Kubernetes prerequisite)
+* All nodes assible using ansible
+
+Check
+```
+ansible -i hosts -m ping all
+
+worker01 | SUCCESS => {
+    "changed": false, 
+    "ping": "pong"
+}
+worker02 | SUCCESS => {
+    "changed": false, 
+    "ping": "pong"
+}
+master01 | SUCCESS => {
+    "changed": false, 
+    "ping": "pong"
+}
+
+```
 Clone git repository
 ```
 git clone https://github.com/bishnoink/kube-training.git .
@@ -94,7 +118,12 @@ worker02   Ready    <none>   3m24s   v1.14.3
 mkdir ~/.kube
 scp root@master01:/home/kube/.kube/config ~/.kube/
 ```
+## Troubleshooting
 
+if SELinux is already disabled then you may get below error, which can be ignored.
+```
+"stderr": "setenforce: SELinux is disabled"
+```
 ## License
 
 This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE](LICENSE) file for details
