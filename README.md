@@ -1,7 +1,8 @@
 # Summarize Text
 Ansible playbooks to install multinode Kubernetes cluster in below environment 
-**Behind proxy server
-**Without proxy server
+
+*Behind proxy server
+*Without proxy server
 
 ## Getting Started
 
@@ -60,7 +61,7 @@ ansible-playbook -i hosts prepare-cluster.yml
 
 ```
 ## Initialize cluster and join worker nodes into cluster
-
+```
 ansible-playbook -i hosts init-cluster.yml
 
 ```
@@ -93,6 +94,7 @@ worker02   Ready    <none>   3m24s   v1.14.3
 mkdir ~/.kube
 scp root@master01:/home/kube/.kube/config ~/.kube/
 ```
+
 ## License
 
 This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE](LICENSE) file for details
