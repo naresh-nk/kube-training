@@ -35,13 +35,13 @@
       copy: src=/etc/kubernetes/admin.conf dest=/home/kube/.kube/config remote_src=yes owner=kube
     
     - name: Create flannel network when proxy server is configured in environment
-      when: "{{ proxy_setup }}"
+      when: proxy_setup
       become_user: kube
       shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
       environment: "{{ proxy_env }}"
       args:
         chdir: $HOME
-        creates: pod_network_setup.txt
+      register: netowrk_created
 
     - name: Create flannel network
       when: cluster_initialized is succeeded
@@ -49,14 +49,17 @@
       shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml
       args:
         chdir: $HOME
-        creates: pod_network_setup.txt
+      register: netowrk_created
 
     - name: Get cluster join command
+      when: netowrk_created is succeeded
+      become_user: kube
       shell: kubeadm token create --print-join-command
       register: join_command_raw
     - debug:
         var: join_command_raw.stdout
-    - debug:  var=hostvars[groups['master'][0]]['join_command_raw'].stdout
+      retries: 3
+      delay: 3
 
 - hosts: workers
   become: yes

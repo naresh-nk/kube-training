@@ -3,7 +3,7 @@
 reset_cluster: true
 
 #Proxy server
-proxy_setup: False
+proxy_setup: false
 
 #Configure below proxy configs      when: {{ proxy_setup }} is set to True
 

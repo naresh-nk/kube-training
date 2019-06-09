@@ -14,14 +14,14 @@
        validate: 'visudo -cf %s'
 
    - name: Configure proxy for yum
-     when: "{{ proxy_setup }}"
+     when: proxy_setup
      lineinfile: dest=/etc/yum.conf state=present regexp='^proxy' line='proxy={{ proxy_server }}'
 
    - name: Create dicrectory for docker proxy config file
      file: name=/etc/systemd/system/docker.service.d state=directory
 
    - name: Docker proxy for config
-     when: "{{ proxy_setup }}"
+     when: proxy_setup
      template: dest=/etc/systemd/system/docker.service.d/http-proxy.conf src=http-proxy.conf.j2
 
    - name: Install Packages
@@ -47,8 +47,8 @@
    - name: Daemon-reload
      shell: systemctl daemon-reload
 
-   - name: Enable Docker
-     shell: "systemctl enable docker"
+   #- name: Enable Docker
+    # shell: "systemctl enable docker"
 
    - name: Restart Docker
      service: name=docker state=restarted
@@ -80,6 +80,12 @@
      yum: name=kubelet,kubeadm state=present update_cache=true
      retries: 3
      delay: 3
+
+   - name: Enable docker service
+     service: name=docker enabled=yes
+
+   - name: Enable kubelet service
+     service: name=kubelet enabled=yes
 
 - hosts: master
   become: yes
