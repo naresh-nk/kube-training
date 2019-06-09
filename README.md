@@ -88,7 +88,11 @@ worker01   Ready    <none>   3m25s   v1.14.3
 worker02   Ready    <none>   3m24s   v1.14.3
 
 ```
-
+## Copy kube config from master node to local machine/laptop to manage k8 cluster remotely
+```
+mkdir ~/.kube
+scp root@master01:/home/kube/.kube/config ~/.kube/
+```
 ## License
 
 This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the [LICENSE](LICENSE) file for details
