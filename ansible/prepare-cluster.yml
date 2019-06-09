@@ -41,17 +41,20 @@
      file: name=/etc/systemd/system/docker.service.d state=directory
 
    - name: Docker proxy for config
-     when: "{{ proxy_setup }}"
+     when: proxy_setup
      template: dest=/etc/systemd/system/docker.service.d/http-proxy.conf src=http-proxy.conf.j2
 
    - name: Daemon-reload
      shell: systemctl daemon-reload
 
-   #- name: Enable Docker
-    # shell: "systemctl enable docker"
+   - name: Enable docker service
+     service: name=docker enabled=yes
 
    - name: Restart Docker
      service: name=docker state=restarted
+
+   - name: Stop and disable firewalld
+     service: name=firewalld state=stopped enabled=no
 
    - name: Disable SELinux
      shell: setenforce 0
@@ -80,9 +83,6 @@
      yum: name=kubelet,kubeadm state=present update_cache=true
      retries: 3
      delay: 3
-
-   - name: Enable docker service
-     service: name=docker enabled=yes
 
    - name: Enable kubelet service
      service: name=kubelet enabled=yes
