@@ -5,7 +5,6 @@
     - name: Reset existing cluster if any
       when: reset_cluster
       shell: "kubeadm reset --force"
-      register: reset_cluster
 
 - hosts: master
   become: yes
@@ -17,6 +16,7 @@
       register: reset_iptables
   
     - name: Initialize cluster
+      when: reset_cluster
       when: reset_iptables is succeeded
       shell: kubeadm init --token {{ token }} \ 
         --kubernetes-version {{ kube_version }} \

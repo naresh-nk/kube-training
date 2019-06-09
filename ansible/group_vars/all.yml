@@ -1,3 +1,7 @@
+# Reset exisintg cluster
+## If below variable is set to true then entire exiting cluster config will be deleted
+reset_cluster: true
+
 #Proxy server
 proxy_setup: False
 
