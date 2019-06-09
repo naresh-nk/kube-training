@@ -1,8 +1,8 @@
 # Summarize Text
 Ansible playbooks to install multinode Kubernetes cluster in below environment 
 
-*Behind proxy server
-*Without proxy server
+* Behind proxy server
+* Without proxy server
 
 ## Getting Started
 
